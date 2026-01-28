@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advisory Management System + Preview</title>
+    <style>
+        /* --- 1. MISINGI & RANGI --- */
+        :root {
+            --primary-color: #2E7D32;
+            --secondary-bg: #f4f7f6;
+            --border-radius: 8px;
+            --phone-border: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #eef2f5;
+            overflow: hidden;
+        }
+
+        /* --- 2. SIDEBAR --- */
+        .sidebar {
+            width: 240px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 { margin-bottom: 40px; font-size: 1.2rem; }
+        .menu-item { padding: 15px; cursor: pointer; border-radius: 8px; opacity: 0.8; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.2); opacity: 1; }
+
+        /* --- 3. MAIN AREA --- */
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+        
+        .tabs { border-bottom: 2px solid #ddd; margin-bottom: 20px; }
+        .tab-btn {
+            padding: 10px 20px; border: none; background: none; 
+            font-size: 1rem; cursor: pointer; color: #666;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: bold; }
+
+        /* --- 4. MPANGILIO WA GRID (FORM + PREVIEW) --- */
+        .workspace {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr; /* Kushoto Kubwa, Kulia Simu */
+            gap: 30px;
+        }
+
+        .card {
+            background: white; padding: 25px; border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Fomu Styles */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #444; }
+        input, select, textarea {
+            width: 100%; padding: 10px; border: 1px solid #ccc;
+            border-radius: 5px; box-sizing: border-box;
+        }
+        textarea { height: 100px; resize: none; }
+
+        /* --- 5. MOBILE PREVIEW (SIMU YA KULIA) --- */
+        .phone-mockup {
+            width: 280px;
+            height: 550px;
+            background: #fff;
+            border: 12px solid var(--phone-border);
+            border-radius: 35px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Notch ya juu ya simu */
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 20px; background: var(--phone-border);
+            border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; z-index: 10;
+        }
+
+        .phone-screen {
+            background-color: #f0f2f5; height: 100%; width: 100%;
+            padding: 40px 15px 15px 15px; box-sizing: border-box;
+            display: flex; flex-direction: column;
+        }
+
+        .screen-header {
+            text-align: center; font-size: 0.8rem; color: #888; margin-bottom: 15px;
+        }
+
+        /* Ujumbe ndani ya simu */
+        .msg-bubble {
+            background: white; padding: 15px; border-radius: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary-color);
+            transition: 0.3s;
+        }
+        
+        .msg-title { font-weight: bold; margin-bottom: 5px; display: block; color: #333; }
+        .msg-body { font-size: 0.9rem; color: #555; line-height: 1.4; }
+        .msg-meta { font-size: 0.7rem; color: #999; margin-top: 10px; text-align: right; }
+
+        /* Stylings za Dharura */
+        .emergency-mode { border-left-color: #d32f2f; background: #fff5f5; }
+
+        /* --- 6. TABLE & UTILS --- */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .btn-submit {
+            width: 100%; background: var(--primary-color); color: white;
+            border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 1rem;
+        }
+        .hidden { display: none; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <h2>Agri-Connect</h2>
+        <div class="menu-item active">Advisory Management</div>
+        <div class="menu-item">Wakulima</div>
+        <div class="menu-item">Ripoti</div>
+    </nav>
+
+    <main class="main-content">
+        <div class="header">
+            <h1>Usimamizi wa Ushauri</h1>
+            <span>Afisa: <b>Juma (Mtwara)</b></span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showView('compose')">Tunga Ujumbe</button>
+            <button class="tab-btn" onclick="showView('history')">Historia</button>
+        </div>
+
+        <div id="compose-view" class="workspace">
+            
+            <div class="card">
+                <h3>Andika Ushauri</h3>
+                <form>
+                    <div style="display:flex; gap:10px;">
+                        <div class="form-group" style="flex:1">
+                            <label>Eneo (Region)</label>
+                            <select><option>Mtwara</option><option>Lindi</option></select>
+                        </div>
+                        <div class="form-group" style="flex:1">
+                            <label>Zao (Crop)</label>
+                            <select><option>Korosho</option><option>Mahindi</option></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Aina ya Ujumbe</label>
+                        <select id="msgType" onchange="updatePreview()">
+                            <option value="normal">Kawaida (Ushauri)</option>
+                            <option value="emergency">Dharura (Tahadhari)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kichwa cha Habari</label>
+                        <input type="text" id="inputTitle" oninput="updatePreview()" placeholder="Mf: Tahadhari ya Mvua">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ujumbe Kamili</label>
+                        <textarea id="inputBody" oninput="updatePreview()" placeholder="Andika ujumbe hapa..."></textarea>
+                    </div>
+
+                    <button type="button" class="btn-submit">Tuma Kwa Wakulima</button>
+                </form>
+            </div>
+
+            <div class="preview-area">
+                <div style="text-align:center; margin-bottom:10px; font-weight:bold; color:#666;">Muonekano kwa Mkulima</div>
+                
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="screen-header">SMS / AgriApp</div>
+                        
+                        <div id="previewBubble" class="msg-bubble">
+                            <span id="previewTitle" class="msg-title">Kichwa cha Habari</span>
+                            <span id="previewBody" class="msg-body">
+                                Ujumbe wako utaonekana hapa unapoandika...
+                            </span>
+                            <div class="msg-meta">Sasa hivi • Wizara ya Kilimo</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="history-view" class="card hidden">
+            <h3>Historia ya Ushauri</h3>
+            <table>
+                <thead><tr><th>Tarehe</th><th>Kichwa</th><th>Zao</th><th>Hali</th></tr></thead>
+                <tbody>
+                    <tr><td>04/12/2025</td><td>Mvua za El Nino</td><td>Yote</td><td style="color:green">Imetumwa</td></tr>
+                    <tr><td>03/12/2025</td><td>Bei ya Ufuta</td><td>Ufuta</td><td style="color:orange">Inasubiri</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <script>
+        // 1. Kubadili Tabs
+        function showView(viewName) {
+            document.getElementById('compose-view').classList.add('hidden');
+            document.getElementById('history-view').classList.add('hidden');
+            
+            if(viewName === 'compose') {
+                document.getElementById('compose-view').classList.remove('hidden');
+                document.getElementById('compose-view').style.display = "grid"; // Rudisha Grid
+            } else {
+                document.getElementById('history-view').classList.remove('hidden');
+            }
+        }
+
+        // 2. Real-time Preview Logic
+        function updatePreview() {
+            // Pata maneno kutoka kwenye form
+            var title = document.getElementById('inputTitle').value;
+            var body = document.getElementById('inputBody').value;
+            var type = document.getElementById('msgType').value;
+
+            // Weka kwenye simu (Preview)
+            document.getElementById('previewTitle').innerText = title || "Kichwa cha Habari";
+            document.getElementById('previewBody').innerText = body || "Ujumbe wako utaonekana hapa...";
+
+            // Badili rangi kama ni Dharura
+            var bubble = document.getElementById('previewBubble');
+            if(type === 'emergency') {
+                bubble.classList.add('emergency-mode');
+            } else {
+                bubble.classList.remove('emergency-mode');
+            }
+        }
+    </script>
+</body>
+</html>

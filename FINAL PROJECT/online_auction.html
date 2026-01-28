@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Auction Preview</title>
+    <style>
+        :root { --primary: #2563eb; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; width: 400px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
+        .status-bar { background: #fee2e2; color: var(--danger); padding: 8px; text-align: center; font-weight: 600; font-size: 0.875rem; }
+        .image-area { height: 220px; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b; }
+        .details { padding: 24px; }
+        .price-box { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
+        .current-bid { font-size: 2rem; font-weight: 800; color: #1e293b; }
+        .label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        .timer-val { font-family: monospace; font-size: 1.25rem; color: var(--danger); }
+        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; font-size: 1rem; outline: none; transition: border 0.2s; }
+        input:focus { border-color: var(--primary); }
+        button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.1s; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+        .log { margin-top: 20px; height: 80px; overflow-y: auto; font-size: 0.8rem; border-top: 1px solid #f1f5f9; padding-top: 10px; color: #475569; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="status-bar" id="status">LIVE AUCTION</div>
+    <div class="image-area">ITEM PREVIEW IMAGE</div>
+    
+    <div class="details">
+        <div style="display: flex; justify-content: space-between;">
+            <span class="label">Time Remaining</span>
+            <span class="timer-val" id="timer">00:45</span>
+        </div>
+        
+        <h2>Pro Camera Kit Z1</h2>
+        
+        <div class="price-box">
+            <div>
+                <span class="label">Current Bid</span>
+                <div class="current-bid" id="price">$1,200</div>
+            </div>
+            <div style="text-align: right">
+                <span class="label" id="bidder-name">Highest: User42</span>
+            </div>
+        </div>
+
+        <input type="number" id="bidInput" placeholder="Enter $1,201 or more">
+        <button id="bidBtn" onclick="handleBid()">Place High Bid</button>
+
+        <div class="log" id="log">
+            <div>• Auction started at $1,000</div>
+            <div>• User42 bid $1,200</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timeLeft = 45;
+    let currentPrice = 1200;
+    const timerEl = document.getElementById('timer');
+    const priceEl = document.getElementById('price');
+    const inputEl = document.getElementById('bidInput');
+    const logEl = document.getElementById('log');
+
+    // Countdown Logic
+    const timerInterval = setInterval(() => {
+        timeLeft--;
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('status').innerText = "AUCTION CLOSED";
+            document.getElementById('status').style.background = "#e2e8f0";
+            document.getElementById('status').style.color = "#475569";
+            document.getElementById('bidBtn').disabled = true;
+            inputEl.disabled = true;
+        }
+    }, 1000);
+
+    function handleBid() {
+        const val = parseInt(inputEl.value);
+        if (val > currentPrice) {
+            currentPrice = val;
+            priceEl.innerText = `$${currentPrice.toLocaleString()}`;
+            document.getElementById('bidder-name').innerText = "Highest: YOU";
+            
+            const entry = document.createElement('div');
+            entry.innerHTML = `• <strong>You</strong> bid $${val.toLocaleString()}`;
+            logEl.prepend(entry);
+            
+            inputEl.value = '';
+            inputEl.placeholder = `Enter $${(currentPrice + 1).toLocaleString()} or more`;
+
+            // Anti-Sniping: Reset timer to 15s if it's lower than that
+            if (timeLeft < 15) {
+                timeLeft = 15;
+                const note = document.createElement('div');
+                note.style.color = 'var(--danger)';
+                note.innerText = "• Clock extended by 15s!";
+                logEl.prepend(note);
+            }
+        } else {
+            alert("Bid must be higher!");
+        }
+    }
+</script>
+
+</body>
+</html>
